@@ -9,38 +9,103 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WatchRouteImport } from './routes/watch'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChannelChannelIdRouteImport } from './routes/channel.$channelId'
+import { Route as CategoryGenreRouteImport } from './routes/category.$genre'
 
+const WatchRoute = WatchRouteImport.update({
+  id: '/watch',
+  path: '/watch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChannelChannelIdRoute = ChannelChannelIdRouteImport.update({
+  id: '/channel/$channelId',
+  path: '/channel/$channelId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoryGenreRoute = CategoryGenreRouteImport.update({
+  id: '/category/$genre',
+  path: '/category/$genre',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/search': typeof SearchRoute
+  '/watch': typeof WatchRoute
+  '/category/$genre': typeof CategoryGenreRoute
+  '/channel/$channelId': typeof ChannelChannelIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/search': typeof SearchRoute
+  '/watch': typeof WatchRoute
+  '/category/$genre': typeof CategoryGenreRoute
+  '/channel/$channelId': typeof ChannelChannelIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/search': typeof SearchRoute
+  '/watch': typeof WatchRoute
+  '/category/$genre': typeof CategoryGenreRoute
+  '/channel/$channelId': typeof ChannelChannelIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/search'
+    | '/watch'
+    | '/category/$genre'
+    | '/channel/$channelId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/search' | '/watch' | '/category/$genre' | '/channel/$channelId'
+  id:
+    | '__root__'
+    | '/'
+    | '/search'
+    | '/watch'
+    | '/category/$genre'
+    | '/channel/$channelId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SearchRoute: typeof SearchRoute
+  WatchRoute: typeof WatchRoute
+  CategoryGenreRoute: typeof CategoryGenreRoute
+  ChannelChannelIdRoute: typeof ChannelChannelIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/watch': {
+      id: '/watch'
+      path: '/watch'
+      fullPath: '/watch'
+      preLoaderRoute: typeof WatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +113,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/channel/$channelId': {
+      id: '/channel/$channelId'
+      path: '/channel/$channelId'
+      fullPath: '/channel/$channelId'
+      preLoaderRoute: typeof ChannelChannelIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/category/$genre': {
+      id: '/category/$genre'
+      path: '/category/$genre'
+      fullPath: '/category/$genre'
+      preLoaderRoute: typeof CategoryGenreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SearchRoute: SearchRoute,
+  WatchRoute: WatchRoute,
+  CategoryGenreRoute: CategoryGenreRoute,
+  ChannelChannelIdRoute: ChannelChannelIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

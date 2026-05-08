@@ -3,7 +3,6 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
-  useRouter,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -14,54 +13,33 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+        <h1 className="font-display text-8xl font-black text-gradient">404</h1>
+        <h2 className="mt-4 font-display text-2xl font-bold">Senpai... this page doesn't exist</h2>
+        <p className="mt-2 text-sm text-muted-foreground">The episode you're looking for isn't in the archive.</p>
+        <Link to="/" className="mt-6 inline-flex items-center justify-center rounded-full bg-[var(--gradient-primary)] px-6 py-2.5 text-sm font-bold text-white shadow-[var(--shadow-glow)]">
+          ▶ Back home
+        </Link>
       </div>
     </div>
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error }: { error: Error }) {
   console.error(error);
-  const router = useRouter();
-
+  const quota = /quota|429|403/i.test(error?.message || "");
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+        <div className="text-6xl">😴</div>
+        <h1 className="mt-4 font-display text-2xl font-bold">
+          {quota ? "API-chan is tired!" : "Something broke"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          {quota ? "We've hit the YouTube quota for now. Come back later." : error?.message || "Unknown error"}
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
-        </div>
+        <Link to="/" className="mt-6 inline-flex rounded-full bg-[var(--gradient-primary)] px-6 py-2.5 text-sm font-bold text-white shadow-[var(--shadow-glow)]">
+          Go home
+        </Link>
       </div>
     </div>
   );
@@ -72,19 +50,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "AnimeTube — Watch Anime. Live the Story." },
+      { name: "description", content: "Stream the best anime videos. Trending series, isekai, shonen, mecha and more on AnimeTube." },
+      { name: "theme-color", content: "#0a0a0f" },
+      { property: "og:title", content: "AnimeTube — Watch Anime. Live the Story." },
+      { property: "og:description", content: "Premium anime video streaming, powered by YouTube." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
   }),
@@ -96,7 +75,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
@@ -110,7 +89,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
