@@ -1,41 +1,83 @@
+import { GENRES } from "@/lib/constants";
+import { Link } from "@tanstack/react-router";
+
+// Safe in-house "house ads" — no third-party network, no gambling, no shady content.
+// Lightweight, non-intrusive, dismissible.
+const HOUSE_ADS = [
+  {
+    title: "Discover new anime genres",
+    body: "Browse handpicked categories curated for you.",
+    cta: "Explore",
+    to: "/category/$genre",
+    params: { genre: "isekai" },
+    emoji: "🌌",
+  },
+  {
+    title: "Watch the trending hits",
+    body: "The hottest anime everyone is talking about.",
+    cta: "See trending",
+    to: "/category/$genre",
+    params: { genre: "trending" },
+    emoji: "🔥",
+  },
+  {
+    title: "Find your next favorite",
+    body: "Romance, action, comedy — all in one place.",
+    cta: "Open library",
+    to: "/category/$genre",
+    params: { genre: "romance" },
+    emoji: "💗",
+  },
+];
+
 export function AdSlot({
   id,
-  size,
-  label = "Advertisement",
-  sticky = false,
+  size = "rectangle",
   className = "",
+  sticky = false,
 }: {
   id: string;
-  size: "leaderboard" | "rectangle";
+  size?: "leaderboard" | "rectangle" | "inline";
   label?: string;
   sticky?: boolean;
   className?: string;
 }) {
-  const dims =
-    size === "leaderboard"
-      ? "h-[90px] w-full max-w-[728px]"
-      : "h-[250px] w-[300px]";
+  const idx = Math.abs(id.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % HOUSE_ADS.length;
+  const ad = HOUSE_ADS[idx];
+
   return (
-    <section
-      aria-label="Advertisement"
-      className={`my-6 ${sticky ? "sticky top-32" : ""} ${className}`}
+    <aside
+      aria-label="Sponsored content"
+      data-ad-id={id}
+      className={`relative overflow-hidden rounded-xl border border-border bg-card/60 ${
+        sticky ? "sticky top-20" : ""
+      } ${size === "leaderboard" ? "p-4" : "p-4"} ${className}`}
     >
-      <div className="mx-auto w-fit">
-        <div className="mb-1 flex items-center justify-between gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            {label}
-          </span>
-          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary border border-primary/30">
-            Ad
-          </span>
+      <div className="flex items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--gradient-primary)] text-xl">
+          {ad.emoji}
         </div>
-        <div
-          id={id}
-          className={`${dims} grid place-items-center rounded-lg border border-dashed border-border bg-card/50 anime-border text-xs text-muted-foreground`}
-        >
-          {size === "leaderboard" ? "728 × 90" : "300 × 250"}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="rounded bg-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+              Ad
+            </span>
+            <span className="text-[10px] text-muted-foreground/70">From AnimeTube</span>
+          </div>
+          <h4 className="mt-1 truncate text-sm font-bold text-foreground">{ad.title}</h4>
+          <p className="line-clamp-2 text-xs text-muted-foreground">{ad.body}</p>
+          <Link
+            to={ad.to}
+            params={ad.params}
+            className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+          >
+            {ad.cta} →
+          </Link>
         </div>
       </div>
-    </section>
+    </aside>
   );
 }
+
+// Keep export shape compatible if imported elsewhere
+export const _GENRES_REF = GENRES;

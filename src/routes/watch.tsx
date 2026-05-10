@@ -66,10 +66,18 @@ function VideoMain() {
         <span>{formatViews(video.statistics?.viewCount)} views</span>
         <span>·</span>
         <span>{timeAgo(video.snippet.publishedAt)}</span>
-        <div className="ml-auto flex gap-2">
-          <button className="rounded-full border border-border bg-card px-4 py-1.5 text-xs font-bold hover:border-primary hover:text-primary">👍 {formatViews(video.statistics?.likeCount)}</button>
-          <button className="rounded-full border border-border bg-card px-4 py-1.5 text-xs font-bold hover:border-primary hover:text-primary">↗ Share</button>
-        </div>
+        <button
+          onClick={() => {
+            if (typeof navigator !== "undefined" && navigator.share) {
+              navigator.share({ title: video.snippet.title, url: window.location.href }).catch(() => {});
+            } else if (typeof navigator !== "undefined") {
+              navigator.clipboard?.writeText(window.location.href);
+            }
+          }}
+          className="ml-auto rounded-full border border-border bg-card px-4 py-1.5 text-xs font-bold hover:border-primary hover:text-primary"
+        >
+          ↗ Share
+        </button>
       </div>
 
       <div className="anime-border mt-4 flex items-center gap-3 rounded-xl bg-card p-4">
@@ -81,7 +89,6 @@ function VideoMain() {
             {video.snippet.channelTitle}
           </Link>
         </div>
-        <button className="rounded-full bg-[var(--gradient-primary)] px-5 py-2 text-xs font-bold text-white shadow-[var(--shadow-glow)]">Subscribe</button>
       </div>
 
       <div className="anime-border mt-4 rounded-xl bg-card p-4">

@@ -45,7 +45,7 @@ function SearchPage() {
           <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sort:</label>
           <select
             value={order}
-            onChange={(e) => navigate({ search: (p) => ({ ...p, order: e.target.value as any }) })}
+            onChange={(e) => navigate({ search: (p: any) => ({ ...p, order: e.target.value as any }) })}
             className="anime-border rounded-full bg-card px-4 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="relevance">Relevance</option>
@@ -56,7 +56,7 @@ function SearchPage() {
           <label className="ml-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Duration:</label>
           <select
             value={videoDuration}
-            onChange={(e) => navigate({ search: (p) => ({ ...p, videoDuration: e.target.value as any }) })}
+            onChange={(e) => navigate({ search: (p: any) => ({ ...p, videoDuration: e.target.value as any }) })}
             className="anime-border rounded-full bg-card px-4 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="any">Any</option>
