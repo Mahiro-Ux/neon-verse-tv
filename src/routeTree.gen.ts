@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchRouteImport } from './routes/watch'
+import { Route as ShortsRouteImport } from './routes/shorts'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as LiveRouteImport } from './routes/live'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChannelChannelIdRouteImport } from './routes/channel.$channelId'
 import { Route as CategoryGenreRouteImport } from './routes/category.$genre'
@@ -20,9 +23,24 @@ const WatchRoute = WatchRouteImport.update({
   path: '/watch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShortsRoute = ShortsRouteImport.update({
+  id: '/shorts',
+  path: '/shorts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveRoute = LiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +61,20 @@ const CategoryGenreRoute = CategoryGenreRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/live': typeof LiveRoute
   '/search': typeof SearchRoute
+  '/shorts': typeof ShortsRoute
   '/watch': typeof WatchRoute
   '/category/$genre': typeof CategoryGenreRoute
   '/channel/$channelId': typeof ChannelChannelIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/live': typeof LiveRoute
   '/search': typeof SearchRoute
+  '/shorts': typeof ShortsRoute
   '/watch': typeof WatchRoute
   '/category/$genre': typeof CategoryGenreRoute
   '/channel/$channelId': typeof ChannelChannelIdRoute
@@ -58,7 +82,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/live': typeof LiveRoute
   '/search': typeof SearchRoute
+  '/shorts': typeof ShortsRoute
   '/watch': typeof WatchRoute
   '/category/$genre': typeof CategoryGenreRoute
   '/channel/$channelId': typeof ChannelChannelIdRoute
@@ -67,16 +94,30 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
+    | '/live'
     | '/search'
+    | '/shorts'
     | '/watch'
     | '/category/$genre'
     | '/channel/$channelId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/search' | '/watch' | '/category/$genre' | '/channel/$channelId'
+  to:
+    | '/'
+    | '/about'
+    | '/live'
+    | '/search'
+    | '/shorts'
+    | '/watch'
+    | '/category/$genre'
+    | '/channel/$channelId'
   id:
     | '__root__'
     | '/'
+    | '/about'
+    | '/live'
     | '/search'
+    | '/shorts'
     | '/watch'
     | '/category/$genre'
     | '/channel/$channelId'
@@ -84,7 +125,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  LiveRoute: typeof LiveRoute
   SearchRoute: typeof SearchRoute
+  ShortsRoute: typeof ShortsRoute
   WatchRoute: typeof WatchRoute
   CategoryGenreRoute: typeof CategoryGenreRoute
   ChannelChannelIdRoute: typeof ChannelChannelIdRoute
@@ -99,11 +143,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shorts': {
+      id: '/shorts'
+      path: '/shorts'
+      fullPath: '/shorts'
+      preLoaderRoute: typeof ShortsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live': {
+      id: '/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof LiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -132,7 +197,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  LiveRoute: LiveRoute,
   SearchRoute: SearchRoute,
+  ShortsRoute: ShortsRoute,
   WatchRoute: WatchRoute,
   CategoryGenreRoute: CategoryGenreRoute,
   ChannelChannelIdRoute: ChannelChannelIdRoute,

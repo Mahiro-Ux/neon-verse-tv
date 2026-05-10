@@ -1,16 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { Navbar } from "@/components/Navbar";
-import { GenreTabs } from "@/components/GenreTabs";
-import { Footer } from "@/components/Footer";
+import { Sidebar } from "@/components/Sidebar";
 import { VideoCard } from "@/components/VideoCard";
 import { SkeletonCard } from "@/components/SkeletonCard";
 import { Spinner } from "@/components/Shuriken";
+import { Equalizer } from "@/components/Equalizer";
+import { AdSlot } from "@/components/AdSlot";
 import { getVideo, getComments, getRelated } from "@/lib/youtube.functions";
 import { formatViews, timeAgo } from "@/lib/format";
+import { trackWatch } from "@/hooks/use-watch-history";
 
 const searchSchema = z.object({
   v: fallback(z.string(), "").default(""),
@@ -30,6 +32,30 @@ export const Route = createFileRoute("/watch")({
   component: WatchPage,
 });
 
+function ActionButton({
+  label, icon, onClick, href, variant = "default",
+}: {
+  label: string; icon: string; onClick?: () => void; href?: string;
+  variant?: "default" | "primary" | "danger";
+}) {
+  const cls =
+    "inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-bold hover:border-primary hover:text-primary transition-colors " +
+    (variant === "primary" ? "bg-[var(--gradient-primary)] text-white border-transparent hover:text-white " : "") +
+    (variant === "danger" ? "hover:text-destructive hover:border-destructive " : "");
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+        <span>{icon}</span> <span>{label}</span>
+      </a>
+    );
+  }
+  return (
+    <button onClick={onClick} className={cls}>
+      <span>{icon}</span> <span>{label}</span>
+    </button>
+  );
+}
+
 function VideoMain() {
   const { v } = Route.useSearch();
   const { data } = useSuspenseQuery({
@@ -38,6 +64,18 @@ function VideoMain() {
   });
   const video = data.item;
   const [showFull, setShowFull] = useState(false);
+
+  useEffect(() => {
+    if (!video) return;
+    trackWatch({
+      id: v,
+      title: video.snippet.title,
+      channelTitle: video.snippet.channelTitle,
+      thumb: video.snippet.thumbnails?.medium?.url || video.snippet.thumbnails?.high?.url,
+      tags: video.snippet.tags,
+    });
+  }, [v, video]);
+
   if (!video) {
     return (
       <div className="rounded-xl border border-border bg-card p-8 text-center">
@@ -47,6 +85,10 @@ function VideoMain() {
       </div>
     );
   }
+
+  const ytWatchUrl = `https://www.youtube.com/watch?v=${v}`;
+  const downloadUrl = `https://yt1s.com/youtube/${v}`;
+
   return (
     <div>
       <div className="anime-border overflow-hidden rounded-xl shadow-[var(--shadow-glow)]">
@@ -61,24 +103,43 @@ function VideoMain() {
           />
         </div>
       </div>
+
       <h1 className="mt-4 font-display text-2xl font-bold leading-tight md:text-3xl">{video.snippet.title}</h1>
-      <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
         <span>{formatViews(video.statistics?.viewCount)} views</span>
         <span>·</span>
         <span>{timeAgo(video.snippet.publishedAt)}</span>
-        <button
+        <Equalizer />
+      </div>
+
+      {/* Action bar */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <ActionButton
+          label={`Like  ${formatViews(video.statistics?.likeCount)}`}
+          icon="👍"
+          href={ytWatchUrl}
+        />
+        <ActionButton label="Dislike" icon="👎" href={ytWatchUrl} />
+        <ActionButton
+          label="Share"
+          icon="↗"
           onClick={() => {
             if (typeof navigator !== "undefined" && navigator.share) {
               navigator.share({ title: video.snippet.title, url: window.location.href }).catch(() => {});
             } else if (typeof navigator !== "undefined") {
               navigator.clipboard?.writeText(window.location.href);
+              alert("Link copied!");
             }
           }}
-          className="ml-auto rounded-full border border-border bg-card px-4 py-1.5 text-xs font-bold hover:border-primary hover:text-primary"
-        >
-          ↗ Share
-        </button>
+        />
+        <ActionButton label="Download" icon="⬇️" href={downloadUrl} variant="primary" />
+        <ActionButton label="Watch on YouTube" icon="▶️" href={ytWatchUrl} />
       </div>
+
+      <p className="mt-2 text-[10px] text-muted-foreground/70">
+        Like / Dislike redirect to YouTube — AnimeTube has no login, so you can interact with your own account safely.
+      </p>
 
       <div className="anime-border mt-4 flex items-center gap-3 rounded-xl bg-card p-4">
         <Link to="/channel/$channelId" params={{ channelId: video.snippet.channelId }} className="grid h-12 w-12 place-items-center rounded-full bg-[var(--gradient-primary)] font-bold text-white">
@@ -105,6 +166,10 @@ function VideoMain() {
             ))}
           </div>
         ) : null}
+      </div>
+
+      <div className="mt-4">
+        <AdSlot id="ad-watch-below" size="leaderboard" />
       </div>
 
       <Comments videoId={v} />
@@ -140,7 +205,13 @@ function Comments({ videoId }: { videoId: string }) {
                 <p className="mt-1 text-sm text-foreground" dangerouslySetInnerHTML={{ __html: s.textDisplay }} />
                 <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
                   <span>👍 {formatViews(s.likeCount)}</span>
-                  <button className="hover:text-primary">Reply</button>
+                  <a
+                    href={`https://www.youtube.com/watch?v=${videoId}&lc=${c.id}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="hover:text-primary"
+                  >
+                    Reply on YouTube
+                  </a>
                 </div>
               </div>
             </div>
@@ -174,6 +245,9 @@ function Related() {
           ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} compact />)
           : data?.items?.map((v: any) => <VideoCard key={v.id} video={v} variant="compact" />)}
       </div>
+      <div className="mt-4">
+        <AdSlot id="ad-watch-side" sticky />
+      </div>
     </aside>
   );
 }
@@ -184,11 +258,15 @@ function WatchPage() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <GenreTabs />
-        <div className="grid place-items-center py-32 text-center">
-          <div className="text-6xl">🎬</div>
-          <p className="mt-4 text-muted-foreground">No video selected.</p>
-          <Link to="/" className="mt-3 text-primary underline">Browse trending</Link>
+        <div className="flex">
+          <Sidebar />
+          <main className="flex-1 grid place-items-center py-32 text-center">
+            <div>
+              <div className="text-6xl">🎬</div>
+              <p className="mt-4 text-muted-foreground">No video selected.</p>
+              <Link to="/" className="mt-3 text-primary underline">Browse trending</Link>
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -196,14 +274,15 @@ function WatchPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <GenreTabs />
-      <main className="mx-auto max-w-[1400px] px-4 py-6 lg:grid lg:grid-cols-[1fr_380px] lg:gap-6">
-        <Suspense fallback={<div className="aspect-video skeleton rounded-xl" />}>
-          <VideoMain />
-        </Suspense>
-        <Related />
-      </main>
-      <Footer />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 min-w-0 px-3 py-4 sm:px-4 sm:py-6 lg:grid lg:grid-cols-[1fr_380px] lg:gap-6">
+          <Suspense fallback={<div className="aspect-video skeleton rounded-xl" />}>
+            <VideoMain />
+          </Suspense>
+          <Related />
+        </main>
+      </div>
     </div>
   );
 }

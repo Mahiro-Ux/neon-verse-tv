@@ -6,8 +6,7 @@ import { VideoCard } from "@/components/VideoCard";
 import { SkeletonCard } from "@/components/SkeletonCard";
 import { AdSlot } from "@/components/AdSlot";
 import { trendingAnime, searchVideos } from "@/lib/youtube.functions";
-import { GENRES } from "@/lib/constants";
-import { useState } from "react";
+import { useWatchHistory, topKeywords } from "@/hooks/use-watch-history";
 
 const trendingOpts = {
   queryKey: ["trending"],
@@ -16,74 +15,92 @@ const trendingOpts = {
 };
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "AnimeTube — Watch anime, free, no login" },
+      { name: "description", content: "Stream the latest anime, shorts, and live broadcasts. No login required." },
+    ],
+  }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(trendingOpts);
   },
   component: HomePage,
 });
 
-const CHIPS = [
-  { label: "All", q: "anime" },
-  ...GENRES.map((g) => ({ label: `${g.icon} ${g.label}`, q: `${g.label} anime` })),
-  { label: "AMV", q: "anime AMV" },
-  { label: "OP", q: "anime opening" },
-  { label: "ED", q: "anime ending" },
-];
-
-function ChipBar({ active, onChange }: { active: string; onChange: (q: string) => void }) {
+function ContinueWatching() {
+  const { items, clear } = useWatchHistory();
+  if (items.length === 0) return null;
   return (
-    <div className="sticky top-[64px] z-30 -mx-4 mb-4 border-b border-border bg-background/85 backdrop-blur px-4">
-      <div className="flex gap-2 overflow-x-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {CHIPS.map((c) => (
-          <button
-            key={c.label}
-            onClick={() => onChange(c.q)}
-            data-active={active === c.q ? "true" : "false"}
-            className="anime-pill shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap"
+    <section className="mb-8">
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <h2 className="font-display text-xl font-bold flex items-center gap-2">
+          <span>▶️</span><span className="text-gradient">Continue watching</span>
+        </h2>
+        <button onClick={clear} className="text-xs text-muted-foreground hover:text-primary underline">Clear history</button>
+      </div>
+      <div className="flex gap-4 overflow-x-auto pb-3 [scrollbar-width:thin]">
+        {items.slice(0, 12).map((it) => (
+          <Link
+            key={it.id}
+            to="/watch"
+            search={{ v: it.id }}
+            className="group w-56 shrink-0"
           >
-            {c.label}
-          </button>
+            <div className="relative aspect-video overflow-hidden rounded-xl bg-muted anime-border">
+              {it.thumb && <img src={it.thumb} alt="" loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-110" />}
+            </div>
+            <p className="mt-2 line-clamp-2 text-xs font-semibold group-hover:text-primary">{it.title}</p>
+            <p className="text-[11px] text-muted-foreground truncate">{it.channelTitle}</p>
+          </Link>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
-function VideoGrid() {
-  const [q, setQ] = useState("anime");
-  const isAll = q === "anime";
-  const { data: trending } = useQuery(trendingOpts);
-  const { data: filtered, isLoading } = useQuery({
-    queryKey: ["home", q],
-    queryFn: () => searchVideos({ data: { q, order: "viewCount", maxResults: 32 } }),
-    enabled: !isAll,
+function ForYou() {
+  const kws = topKeywords(3);
+  const q = kws.length ? kws.join(" ") : "anime";
+  const { data, isLoading } = useQuery({
+    queryKey: ["foryou", q],
+    queryFn: () => searchVideos({ data: { q, order: "relevance", maxResults: 12 } }),
+    enabled: kws.length > 0,
     staleTime: 5 * 60 * 1000,
   });
-
-  const items = isAll ? trending?.items : filtered?.items;
-  const showSkeleton = !isAll && isLoading;
-
+  if (kws.length === 0) return null;
   return (
-    <>
-      <ChipBar active={q} onChange={setQ} />
+    <section className="mb-10">
+      <h2 className="mb-3 font-display text-xl font-bold flex items-center gap-2">
+        <span>✨</span><span className="text-gradient">Recommended for you</span>
+        <span className="text-[10px] text-muted-foreground font-normal ml-2">based on what you watch</span>
+      </h2>
       <div className="grid gap-x-4 gap-y-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {showSkeleton || !items
+        {isLoading || !data
+          ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+          : data.items.slice(0, 8).map((v: any) => <VideoCard key={v.id} video={v} />)}
+      </div>
+    </section>
+  );
+}
+
+function Trending() {
+  const { data } = useQuery(trendingOpts);
+  return (
+    <section>
+      <h2 className="mb-3 font-display text-xl font-bold flex items-center gap-2">
+        <span>🔥</span><span className="text-gradient">Trending now</span>
+      </h2>
+      <div className="grid gap-x-4 gap-y-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {!data
           ? Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
-          : items.flatMap((v: any, i: number) => {
+          : data.items.flatMap((v: any, i: number) => {
               const card = <VideoCard key={v.id} video={v} />;
-              // Insert a single discreet ad after the 8th video
-              if (i === 7) {
-                return [
-                  card,
-                  <div key="ad-feed" className="col-span-1">
-                    <AdSlot id="ad-home-feed" size="rectangle" />
-                  </div>,
-                ];
-              }
+              if (i === 7) return [card, <div key="ad" className="col-span-1"><AdSlot id="ad-home-feed" /></div>];
+              if (i === 19) return [card, <div key="ad2" className="col-span-1"><AdSlot id="ad-home-feed-2" /></div>];
               return [card];
             })}
       </div>
-    </>
+    </section>
   );
 }
 
@@ -93,9 +110,11 @@ function HomePage() {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 min-w-0 px-4 py-4">
+        <main className="flex-1 min-w-0 px-3 py-4 sm:px-4 sm:py-6">
           <div className="mx-auto max-w-[1600px]">
-            <VideoGrid />
+            <ContinueWatching />
+            <ForYou />
+            <Trending />
             <div className="mt-12 text-center">
               <Link
                 to="/search"
@@ -105,9 +124,6 @@ function HomePage() {
                 Browse all anime →
               </Link>
             </div>
-            <p className="mt-10 text-center text-[10px] text-muted-foreground/60">
-              © {new Date().getFullYear()} AnimeTube · Powered by YouTube Data API · For demo use
-            </p>
           </div>
         </main>
       </div>

@@ -28,6 +28,7 @@ export const searchVideos = createServerFn({ method: "GET" })
       videoDuration: z.enum(["any", "short", "medium", "long"]).default("any"),
       pageToken: z.string().optional(),
       channelId: z.string().optional(),
+      eventType: z.enum(["completed", "live", "upcoming"]).optional(),
     }).parse,
   )
   .handler(async ({ data }) => {
@@ -40,6 +41,7 @@ export const searchVideos = createServerFn({ method: "GET" })
       videoDuration: data.videoDuration,
       pageToken: data.pageToken,
       channelId: data.channelId,
+      eventType: data.eventType,
       regionCode: "US",
       relevanceLanguage: "en",
     });
