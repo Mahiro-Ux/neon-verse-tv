@@ -1,16 +1,29 @@
 export const GENRES = [
   { slug: "trending", label: "Trending", icon: "🔥" },
+  
+  // Genre-Based Categories
   { slug: "action", label: "Action", icon: "⚔️" },
-  { slug: "romance", label: "Romance", icon: "💗" },
-  { slug: "isekai", label: "Isekai", icon: "🌌" },
-  { slug: "shonen", label: "Shonen", icon: "💥" },
-  { slug: "seinen", label: "Seinen", icon: "🗡️" },
-  { slug: "mecha", label: "Mecha", icon: "🤖" },
+  { slug: "adventure", label: "Adventure", icon: "🗺️" },
+  { slug: "comedy", label: "Comedy", icon: "😂" },
+  { slug: "drama", label: "Drama", icon: "🎭" },
   { slug: "fantasy", label: "Fantasy", icon: "🐉" },
-  { slug: "horror", label: "Horror", icon: "👻" },
+  { slug: "sci-fi", label: "Sci-Fi", icon: "🚀" },
+  { slug: "mystery", label: "Mystery", icon: "🔍" },
+  { slug: "romance", label: "Romance", icon: "💗" },
+  
+  // Demographic-Based Categories (Demographic Targeting)
+  { slug: "shonen", label: "Shonen", icon: "💥" },
+  { slug: "shojo", label: "Shojo", icon: "✨" },
+  { slug: "seinen", label: "Seinen", icon: "🗡️" },
+  { slug: "josei", label: "Josei", icon: "👩" },
+  
+  // Special Theme Categories
+  { slug: "isekai", label: "Isekai", icon: "🌌" },
   { slug: "slice-of-life", label: "Slice of Life", icon: "🍵" },
   { slug: "sports", label: "Sports", icon: "🏐" },
-  { slug: "comedy", label: "Comedy", icon: "😂" },
+  { slug: "supernatural", label: "Supernatural", icon: "👻" },
+  { slug: "mecha", label: "Mecha", icon: "🤖" },
+  { slug: "music", label: "Music", icon: "🎵" },
 ] as const;
 
 export const ANIME_QUOTES = [

@@ -12,7 +12,7 @@ import { useNavigate } from "@tanstack/react-router";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
-  order: fallback(z.enum(["relevance", "date", "viewCount", "rating"]), "relevance").default("relevance"),
+  order: fallback(z.enum(["relevance", "date", "viewCount", "rating"]), "viewCount").default("viewCount"),
   videoDuration: fallback(z.enum(["any", "short", "medium", "long"]), "any").default("any"),
 });
 

@@ -6,6 +6,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { DisclaimerModal } from "@/components/DisclaimerModal";
 
 import appCss from "../styles.css?url";
 
@@ -91,6 +92,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <DisclaimerModal />
       <Outlet />
     </QueryClientProvider>
   );

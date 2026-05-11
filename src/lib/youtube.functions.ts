@@ -1,9 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { processYouTubeResponse } from "./content-filter";
 
 const API = "https://www.googleapis.com/youtube/v3";
 
 async function yt(path: string, params: Record<string, string | number | undefined>) {
+  
   const key = process.env.YOUTUBE_API_KEY;
   if (!key) throw new Error("YOUTUBE_API_KEY not configured");
   const url = new URL(`${API}/${path}`);
@@ -44,6 +46,7 @@ export const searchVideos = createServerFn({ method: "GET" })
       eventType: data.eventType,
       regionCode: "US",
       relevanceLanguage: "en",
+      safeSearch: "strict",
     });
     const ids = (json.items || []).map((i: any) => i.id?.videoId).filter(Boolean).join(",");
     let details: any = { items: [] };
@@ -53,8 +56,9 @@ export const searchVideos = createServerFn({ method: "GET" })
         id: ids,
       });
     }
+    const filteredItems = processYouTubeResponse(details.items || []);
     return {
-      items: details.items || [],
+      items: filteredItems,
       nextPageToken: json.nextPageToken,
       prevPageToken: json.prevPageToken,
     };
@@ -78,6 +82,7 @@ export const trendingAnime = createServerFn({ method: "GET" })
       publishedAfter,
       regionCode: "US",
       relevanceLanguage: "en",
+      safeSearch: "strict",
     });
     const ids = (json.items || []).map((i: any) => i.id?.videoId).filter(Boolean).join(",");
     if (!ids) return { items: [] };
@@ -85,7 +90,8 @@ export const trendingAnime = createServerFn({ method: "GET" })
       part: "snippet,statistics,contentDetails",
       id: ids,
     });
-    return { items: details.items || [] };
+    const filteredItems = processYouTubeResponse(details.items || []);
+    return { items: filteredItems };
   });
 
 export const getVideo = createServerFn({ method: "GET" })
@@ -95,7 +101,8 @@ export const getVideo = createServerFn({ method: "GET" })
       part: "snippet,statistics,contentDetails",
       id: data.id,
     });
-    return { item: json.items?.[0] || null };
+    const filtered = processYouTubeResponse(json.items || []);
+    return { item: filtered[0] || null };
   });
 
 export const getComments = createServerFn({ method: "GET" })
@@ -124,6 +131,7 @@ export const getRelated = createServerFn({ method: "GET" })
       q: data.q,
       maxResults: 16,
       order: "relevance",
+      safeSearch: "strict",
     });
     const ids = (json.items || [])
       .map((i: any) => i.id?.videoId)
@@ -135,7 +143,8 @@ export const getRelated = createServerFn({ method: "GET" })
       part: "snippet,statistics,contentDetails",
       id: ids,
     });
-    return { items: details.items || [] };
+    const filteredItems = processYouTubeResponse(details.items || []);
+    return { items: filteredItems };
   });
 
 export const getChannel = createServerFn({ method: "GET" })

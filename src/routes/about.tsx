@@ -66,6 +66,24 @@ function AboutPage() {
                 AnimeTube is an unofficial, non-commercial interface and is not affiliated with YouTube or any anime studio.</p>
             </Section>
 
+            <Section id="disclaimer" title="⚖️ Legal & Moral Disclaimer">
+              <p className="font-semibold text-primary">Content Responsibility</p>
+              <p>
+                This website only displays third-party content through the YouTube API. We do not support or accept responsibility for content uploaded by users on the original platform. 
+                AnimeTube operates as a content aggregation interface and does not endorse any specific video or channel.
+              </p>
+              <p className="font-semibold text-primary mt-3">Parental Guidance</p>
+              <p>
+                While we implement content filtering systems to promote family-friendly content, we cannot guarantee 100% accuracy. Parents and guardians are encouraged to monitor viewing activity. 
+                We recommend using YouTube's built-in parental controls and browser extensions for additional protection.
+              </p>
+              <p className="font-semibold text-primary mt-3">User Responsibility</p>
+              <p>
+                Content viewed through the search feature is chosen by the user. AnimeTube provides tools and filters to support responsible viewing choices, but users are ultimately responsible for their own selections and interactions with content. 
+                Users have full agency in what they search for and watch.
+              </p>
+            </Section>
+
             <AdSlot id="ad-about-bottom" size="leaderboard" />
 
             <div className="text-center">

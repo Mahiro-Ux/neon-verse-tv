@@ -20,6 +20,9 @@ export function Footer({ showAd = false }: { showAd?: boolean }) {
           </div>
           <p className="mt-3 text-sm text-muted-foreground">Watch Anime. Live the Story.</p>
           <p className="mt-2 text-xs text-muted-foreground/70">Powered by YouTube Data API v3.</p>
+          <p className="mt-3 text-xs text-muted-foreground/60 leading-relaxed">
+            Third-party content via YouTube API. <Link to="/about" className="hover:text-primary underline">Legal Disclaimer</Link>
+          </p>
         </div>
         <div>
           <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Explore</h4>
@@ -36,7 +39,7 @@ export function Footer({ showAd = false }: { showAd?: boolean }) {
         <div>
           <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Company</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li><a href="#" className="hover:text-primary">About</a></li>
+            <li><Link to="/about" className="hover:text-primary">About</Link></li>
             <li><a href="#" className="hover:text-primary">Contact</a></li>
             <li><a href="#" className="hover:text-primary">Privacy</a></li>
             <li><a href="#" className="hover:text-primary">Terms</a></li>
@@ -55,6 +58,15 @@ export function Footer({ showAd = false }: { showAd?: boolean }) {
               </a>
             ))}
           </div>
+        </div>
+      </div>
+      <div className="border-t border-border bg-card/50 py-6">
+        <div className="mx-auto max-w-[1400px] px-4">
+          <p className="text-xs text-muted-foreground leading-relaxed text-center">
+            <strong>Disclaimer:</strong> This website displays third-party content through the YouTube API. 
+            We do not support or accept responsibility for content uploaded by users on the original platform. 
+            Content viewed here is the user's own choice and responsibility.
+          </p>
         </div>
       </div>
       <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
